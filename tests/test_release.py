@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import patch
 import sys
 sys.path.append('/Users/andrewh/projects/escrow/src')
-from src.parties.buyer import Buyer
-from src.parties.seller import Seller
+from parties.buyer import Buyer
+from parties.seller import Seller
 
 
 class TestEscrow(unittest.TestCase):
@@ -18,6 +18,8 @@ class TestEscrow(unittest.TestCase):
 
         with patch.object(buyer, "choose_item", return_value=seller.storefront[0]):
             escrow = buyer.initiate_escrow(seller)
+            escrow.get_escrow_details()
+            seller.approve_escrow(escrow)
             if escrow:
                 escrow.release()
 

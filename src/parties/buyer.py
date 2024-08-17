@@ -1,11 +1,10 @@
+from parties.user import User
 from parties.escrow import Escrow
 
-class Buyer:
+class Buyer(User):
     def __init__(self, name, balance):
-        self.name = name
-        self.balance = balance
+        User.__init__(self, name, balance)
         self.purchased_items = []
-        self.escrow_accounts = {}
 
 
     def get_buyer_details(self):
@@ -46,58 +45,15 @@ class Buyer:
                 return None
 
             escrow = Escrow(buyer=self, seller=seller, item=item)
+            escrow.buyer_approved = True
+            escrow.status = "Pending"
             self.balance -= item.price
             self.escrow_accounts[escrow.id] = escrow
-            for _ in seller.storefront:
-                if _.id == item.id:
-                    seller.storefront.remove(_)
 
-            print(f"A transaction has been initiated between {self.name} and {seller.name} for {item.name} (ID: {item.id})\n")
+            print(f"{self.name} has requested an escrow service (ID: {escrow.id}) for {seller.name}'s {item.name} (ID: {item.id})\n")
             return escrow
 
         print(f"Item not found in {seller}'s storefront.")
-
-
-    def dispute_escrow(self, escrow_id):
-        escrow = self.escrow_accounts.get(escrow_id)
-        if escrow:
-            if escrow.is_disputed:
-                print("Escrow is already in dispute.\n")
-                return None
-
-            dispute = escrow.dispute()
-            if dispute:
-                print(f"Escrow {escrow_id} has been disputed.\n")
-                return None
-            else:
-                print("Failed to dispute the escrow.\n")
-                return None
-
-        print("Escrow not found in active accounts.\n")
-
-
-    def resolve_escrow(self, escrow_id):
-        escrow = self.escrow_accounts.get(escrow_id)
-        if escrow:
-            resolve = escrow.resolve()
-            if resolve:
-                print(f"Escrow {escrow_id} has been resolved.\n")
-                return None
-            else:
-                print("Failed to resolve the escrow.\n")
-                return None
-
-
-    def cancel_escrow(self, escrow_id):
-        escrow = self.escrow_accounts.get(escrow_id)
-        if escrow:
-            cancel = escrow.cancel()
-            if cancel:
-                print(f"Escrow {escrow_id} has been cancelled.\n")
-                return None
-            else:
-                print("Failed to cancel the escrow.\n")
-                return None
 
 
     def finalize_purchase(self, escrow):

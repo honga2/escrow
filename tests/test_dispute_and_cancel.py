@@ -19,6 +19,7 @@ class TestEscrow(unittest.TestCase):
         with patch.object(buyer, "choose_item", return_value=seller.storefront[0]):
             escrow = buyer.initiate_escrow(seller)
             escrow.get_escrow_details()
+            seller.approve_escrow(escrow)
             if escrow:
                 buyer.dispute_escrow(escrow.id)
                 escrow.get_escrow_details()

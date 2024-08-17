@@ -6,8 +6,9 @@ class Escrow:
         self.buyer = buyer
         self.seller = seller
         self.item = item
-        self.is_active = True
-        self.is_disputed = False
+        self.buyer_approved = False
+        self.seller_approved = False
+        self.status = ""
 
 
     def get_escrow_details(self):
@@ -17,36 +18,25 @@ class Escrow:
             f"   Buyer: {self.buyer.name}\n"
             f"   Seller: {self.seller.name}\n"
             f"   Item: {self.item.name}\n"
-            f"   Disputed?: {self.is_disputed}\n"
-            f"   Active?: {self.is_active}\n"
+            f"   Buyer approved?: {self.buyer_approved}\n"
+            f"   Seller approved?: {self.seller_approved}\n"
+            f"   Escrow status: {self.status}\n"
         )
 
         print(escrow_details)
 
 
-    def dispute(self):
-        if not self.is_disputed and self.is_active:
-            self.is_disputed = True
-        return True
-
-
-    def resolve(self):
-        self.is_disputed = False
-        return True
-
-
     def cancel(self):
-        if self.is_active:
-            self.buyer.balance += self.item.price
-            self.seller.storefront.append(self.item)
-            self.is_active = False
-            self.buyer.escrow_accounts.pop(self.id)
-        return True
+        self.buyer.balance += self.item.price
+        self.seller.storefront.append(self.item)
+        self.buyer.escrow_accounts.pop(self.id)
+        print(f"Escrow with ID: {self.id} has been cancelled.\n")
 
 
     def validate_transaction(self):
-        valid = [not self.is_disputed,
-                 self.is_active,
+        valid = [self.status == "Active",
+                 self.buyer_approved,
+                 self.seller_approved,
                  self.buyer.balance >= self.item.price,
                  (self.item.id == seller_item.item.id for seller_item in self.seller.storefront)]
 
@@ -55,7 +45,7 @@ class Escrow:
 
     def release(self):
         if self.validate_transaction():
-            self.is_active = False
+            self.status = "Released"
             self.buyer.finalize_purchase(self)
             self.seller.receive_payment(self.item.price)
         else:
